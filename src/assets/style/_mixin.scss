@@ -1,0 +1,27 @@
+@mixin gradientText($color1: #3cddff, $color2: #0084ff, $to: top) {
+  position: relative;
+  color: $color1;
+  &:before {
+    content: attr(text);
+    position: absolute;
+    // z-index: 10;
+    color: $color2;
+    -webkit-mask: linear-gradient(to $to, $color1, transparent);
+  }
+}
+
+@mixin scrollBar {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background: #b5b5b5;
+  }
+  ::-webkit-scrollbar-track {
+    /*滚动条里面轨道*/
+    border-radius: 2px;
+    background: rgba(181, 181, 181, 0.3);
+  }
+}
