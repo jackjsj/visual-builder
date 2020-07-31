@@ -7,7 +7,7 @@
       <!-- 插入元素工具 -->
       <div>
         <a-button
-          @click="addElement">添加图表</a-button>
+          @click="addElement('chart')">添加图表</a-button>
       </div>
       <!-- 构建相关 -->
       <div>
@@ -87,7 +87,7 @@ export default {
     init() {
       const appConfig = new AppConfig({
         container: new Container({
-          el: this.$refs.container.$el,
+          $el: this.$refs.container.$el, // 以$开头的参数将不进行序列化
         }),
       });
       Vue.prototype.$appConfig = appConfig;
@@ -100,11 +100,32 @@ export default {
       localStorage.setItem('appConfig', JSON.stringify(this.$appConfig));
       this.$router.push('application');
     },
-    addElement() {
+    addElement(type) {
       // 添加相应配置
       this.$appConfig.getContainer().addElement(
         new Element({
-          editable: true,
+          $editable: true, // 以$开头的参数将不进行序列化
+          type,
+          chartOption: {
+            title: {
+              text: 'ECharts 入门示例',
+            },
+            tooltip: {},
+            legend: {
+              data: ['销量'],
+            },
+            xAxis: {
+              data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子'],
+            },
+            yAxis: {},
+            series: [
+              {
+                name: '销量',
+                type: 'bar',
+                data: [5, 20, 36, 10, 10, 20],
+              },
+            ],
+          },
         }),
       );
     },

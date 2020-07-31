@@ -1,20 +1,29 @@
 <template>
-  <div class="element active" :class="{editing:isEditing}" v-dragable="dragCallbacks">
+  <!-- 编辑状态 -->
+  <div class="element editing" v-dragable="callbacks" v-if="editable"
+    @mousedown="onElementClick"
+    :class="{active}">
     <!-- element 激活状态下显示的 -->
-    <div class="width-resizer" v-resizable:w v-if="isEditing">
+    <div class="width-resizer" v-resizable:w="callbacks">
       <!-- 宽度调节器 -->
     </div>
-    <div class="height-resizer" v-resizable:h v-if="isEditing">
+    <div class="height-resizer" v-resizable:h="callbacks">
       <!-- 高度调节器 -->
     </div>
-    <div class="wh-resizer" v-resizable:wh v-if="isEditing">
+    <div class="wh-resizer" v-resizable:wh="callbacks">
       <!-- 宽高调节器 -->
     </div>
-    <div class="offset-line" :coord="`${left}, ${top}`" v-if="isEditing">
+    <div class="offset-line" :coord="`${left}, ${top}`">
       <!-- 指示线 -->
     </div>
-    <slot>
-    </slot>
+    <div class="w100p h100p rel" ref="content">
+      这是一个空的元素
+    </div>
+  </div>
+  <!-- 非编辑状态 -->
+  <div class="element" v-else>
+    <div class="w100p h100p rel" ref="content">
+    </div>
   </div>
 </template>
 
@@ -27,30 +36,30 @@ export default {
     return {
       top: 20,
       left: 20,
-      dragCallbacks: {},
+      callbacks: {},
+      active: false,
     };
   },
   props: {
-    isEditing: {
+    editable: {
       type: Boolean,
       default() {
         return false;
       },
     },
   },
-  created() {
-    const elements = this.$appConfig.getContainer().getElements();
-    this.dragCallbacks = {
-      onDrag: e => {
-        this.top = e.top;
-        this.left = e.left;
-      },
-      onDragEnd: e => {
-        // 修改相应配置
-        elements[0].setTop(e.top);
-        elements[0].setLeft(e.left);
-      },
-    };
+  methods: {
+    onElementClick() {
+      this.active = true;
+      const el = this.$el;
+      const onDocumentClick = e => {
+        if (!e.path.includes(el)) {
+          this.active = false;
+          document.removeEventListener('click', onDocumentClick);
+        }
+      };
+      document.addEventListener('click', onDocumentClick);
+    },
   },
 };
 </script>
@@ -100,29 +109,29 @@ export default {
         @extend .resizer;
         bottom: -8px;
         right: -8px;
-        width: 8px;
-        height: 8px;
+        width: 16px;
+        height: 16px;
         border-right: 8px solid #09f;
         border-bottom: 8px solid #09f;
         cursor: se-resize;
       }
-    }
-    .offset-line {
-      pointer-events: none;
-      position: absolute;
-      top: 0;
-      width: 10000px;
-      height: 10000px;
-      border: 1px dashed #09f;
-      background: transparent;
-      transform: translate(-100%, -100%);
-      &::after {
+      .offset-line {
+        pointer-events: none;
         position: absolute;
-        font-size: 20px;
-        bottom: 10px;
-        right: 10px;
-        color: #09f;
-        content: attr(coord);
+        top: 0;
+        width: 10000px;
+        height: 10000px;
+        border: 1px dashed #09f;
+        background: transparent;
+        transform: translate(-100%, -100%);
+        &::after {
+          position: absolute;
+          font-size: 20px;
+          bottom: 10px;
+          right: 10px;
+          color: #09f;
+          content: attr(coord);
+        }
       }
     }
     &.resizing {

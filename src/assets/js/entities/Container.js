@@ -1,9 +1,8 @@
-import Vue from 'vue';
-import ElementComponent from '@/components/Element';
 import { toJSON } from '../utils';
+import Element from './Element';
 
 // 默认配置
-const defaultOptions = {
+const defaultOptions = () => ({
   size: {
     width: 1920,
     height: 1080,
@@ -12,19 +11,25 @@ const defaultOptions = {
     color: '#000',
   },
   elements: [],
-};
+});
 
 export default class Container {
   constructor(options = {}) {
-    const _options = { ...defaultOptions, ...options };
-    this.size = _options.size;
-    this.background = _options.size;
-    this.elements = _options.elements;
-    this.$el = _options.el;
+    const mergedOptions = { ...defaultOptions(), ...options };
+    Object.assign(this, mergedOptions);
+    if (this.elements.length > 0) {
+      // 如果传参中含有elements，则立即渲染
+      const elements = this.elements.map(ele => {
+        const element = new Element(ele);
+        this.renderElement(element);
+        return element;
+      });
+      this.elements = elements;
+    }
   }
 
   toJSON() {
-    toJSON(this);
+    return toJSON(this);
   }
 
   setWidth(width) {
@@ -45,23 +50,15 @@ export default class Container {
     this.renderElement(element);
   }
 
+  renderElements(elements) {
+    elements.forEach(ele => {
+      this.renderElement(ele);
+    });
+  }
+
   renderElement(element) {
     // 根据配置创建元素
-    const { size, position } = element; // 大小，位置
-    const ElementConstructor = Vue.extend(ElementComponent);
-    console.log(1);
-    const elementInstance = new ElementConstructor({
-      propsData: {
-        isEditing: element.$editable,
-      },
-    });
-    elementInstance.$mount();
-    const el = elementInstance.$el;
-    el.style.top = `${position.top}px`;
-    el.style.left = `${position.left}px`;
-    el.style.width = `${size.width}px`;
-    el.style.height = `${size.height}px`;
-
+    const el = element.render();
     this.$el.appendChild(el);
   }
 

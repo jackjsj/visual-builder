@@ -1,56 +1,43 @@
 import Vue from 'vue';
-import echarts from 'echarts';
 
 // 添加该指令后，元素可拖拽
 Vue.directive('resizable', {
   inserted(el, binding) {
-    let isMouseDown = false;
-    let offsetX = 0;
-    let offsetY = 0;
-    let offsetWidth;
-    let offsetHeight;
-    let x;
-    let y;
     const type = binding.arg;
-
-    el.addEventListener('mousedown', e => {
-      el.offsetParent.classList.add('resizing');
+    const callbacks = binding.value;
+    el.onmousedown = e => {
+      // 计算缩放比例，因为可能元素是被transform:scale()处理过的
+      const rate = el.getBoundingClientRect().width / el.offsetWidth;
       e.stopPropagation();
-      isMouseDown = true;
-      ({ x: offsetX, y: offsetY } = e); // 记录下点击时的X值和Y值
-      // 记录下初始宽度
-      ({ offsetWidth, offsetHeight } = el.offsetParent);
-
-      const targetBox = el.offsetParent.offsetParent;
-
-      function onTargetMousemove(ev) {
-        if (isMouseDown) {
-          x = ev.x - offsetX; // 相对于点击时的X值的偏移距离
-          y = ev.y - offsetY; // 相对于点击时的X值的偏移距离
-          switch (type) {
-            case 'w':
-              // 让宽度加上偏移值
-              el.offsetParent.style.width = `${offsetWidth + x}px`;
-              break;
-            case 'h':
-              // 让宽度加上偏移值
-              el.offsetParent.style.height = `${offsetHeight + y}px`;
-              break;
-            case 'wh':
-              el.offsetParent.style.width = `${offsetWidth + x}px`;
-              el.offsetParent.style.height = `${offsetHeight + y}px`;
-              break;
-          }
+      const targetBox = el.offsetParent;
+      const { style } = targetBox;
+      // 鼠标按下时监听在文档中鼠标移动事件
+      document.onmousemove = ev => {
+        const width = targetBox.offsetWidth + ev.movementX / rate;
+        const height = targetBox.offsetHeight + ev.movementY / rate;
+        switch (type) {
+          case 'w':
+            style.width = `${width}px`;
+            break;
+          case 'h':
+            style.height = `${height}px`;
+            break;
+          case 'wh':
+            style.width = `${width}px`;
+            style.height = `${height}px`;
+            break;
         }
-      }
-      function onBoxMouseUp() {
-        isMouseDown = false;
-        el.offsetParent.classList.remove('resizing');
-        targetBox.removeEventListener('mousemove', onTargetMousemove);
-        targetBox.removeEventListener('mouseup', onBoxMouseUp);
-      }
-      targetBox.addEventListener('mousemove', onTargetMousemove);
-      targetBox.addEventListener('mouseup', onBoxMouseUp);
-    });
+      };
+      document.onmouseup = () => {
+
+        callbacks.resized({
+          width: targetBox.offsetWidth,
+          height: targetBox.offsetHeight,
+        });
+        document.onmousemove = null;
+        document.onmouseup = null;
+      };
+      return false;
+    };
   },
 });
