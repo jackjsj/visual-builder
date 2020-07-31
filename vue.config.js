@@ -31,6 +31,7 @@ module.exports = {
             __dirname,
             './src/antdIcons.js',
           ),
+          entities: path.resolve(__dirname, './src/assets/js/entities'),
         },
       },
       // 优化：使用cdn引入
