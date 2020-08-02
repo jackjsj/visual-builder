@@ -15,6 +15,9 @@ const defaultOptions = () => ({
     left: 30,
     top: 30,
   },
+  background: {
+    color: 'rgba(0, 0, 0, 0.8)',
+  },
 });
 
 export default class Element {
@@ -86,6 +89,11 @@ export default class Element {
     this.fill();
   }
 
+  setBackgroundColor(color) {
+    this.background.color = color;
+    this.$el.style.backgroundColor = `${color}`;
+  }
+
   // 渲染方法
   render() {
     const { $editable } = this; // 大小，位置
@@ -120,7 +128,7 @@ export default class Element {
     this.$el = el;
     this.$elementVM = elementVM; // 在配置实例上添加一个指针指向对应的 vue实例
     elementVM.$target = this; // 在vue实例上添加一个指针指向配置实例本身
-    this.setStyle(el);
+    this.setStyle();
     // 将指定类型的内容填充到元素中
     this.fill();
     return el; // 返回一个el
@@ -138,14 +146,13 @@ export default class Element {
   }
 
   // 设置样式
-  setStyle(el) {
-    const { size, position } = this; // 大小，位置
-    const { style } = el;
-    style.top = `${position.top}px`;
-    style.left = `${position.left}px`;
-    style.width = `${size.width}px`;
-    style.height = `${size.height}px`;
-    return el; // 返回一个el
+  setStyle() {
+    const { size, position, background } = this; // 大小，位置
+    this.setTop(position.top);
+    this.setLeft(position.left);
+    this.setWidth(size.width);
+    this.setHeight(size.height);
+    this.setBackgroundColor(background.color);
   }
 
   // 根据类型填充内容到元素中

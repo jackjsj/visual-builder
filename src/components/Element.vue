@@ -143,7 +143,6 @@ export default {
   left: 20px;
   width: 600px;
   height: 400px;
-  background: rgba(0, 0, 0, 0.8);
   border: 2px solid transparent;
   &.editing {
     &:hover {

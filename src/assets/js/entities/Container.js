@@ -47,6 +47,7 @@ export default class Container {
 
   setBackgroundColor(color) {
     this.background.color = color;
+    this.$el.style.backgroundColor = `${color}`;
   }
 
   render() {

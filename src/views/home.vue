@@ -40,7 +40,7 @@
           </ContainerComponent>
         </div>
       </div>
-      <div class="right">
+      <div class="right ova">
         <ContainerConfigPanel :options="containerConfig"
           @change="onContainerConfigChange" v-if="$store.state.activeElements.length === 0" />
         <ChartConfigPanel v-else :options="$store.state.activeElements[0]"

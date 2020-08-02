@@ -36,6 +36,12 @@
               v-model="options.position.top"
               @change="options.setTop(options.position.top)" />
           </a-form-item>
+          <a-divider dashed></a-divider>
+          <a-form-item label="背景颜色">
+            <color-picker
+              :value="options.background.color"
+              @input="onColorChange"></color-picker>
+          </a-form-item>
         </a-form>
       </a-tab-pane>
       <a-tab-pane key="2" tab="数据">
@@ -124,7 +130,7 @@ export default {
   watch: {
     options(newValue, oldValue) {
       this.code = JSON.stringify(newValue.chartOption, null, 2);
-    }
+    },
   },
   methods: {
     refreshData() {

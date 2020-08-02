@@ -4,7 +4,7 @@
     <div class="title">
       <slot name="header">{{$attrs.name}}</slot>
     </div>
-    <div class="content">
+    <div class="content ova">
       <slot></slot>
     </div>
   </div>
@@ -35,6 +35,10 @@ export default {};
   .CodeMirror {
     border: 1px solid #eee;
     max-height: 380px;
+  }
+  .vc-chrome {
+    width: auto;
+    margin-bottom: 10px;
   }
 }
 </style>
