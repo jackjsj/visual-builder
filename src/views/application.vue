@@ -1,7 +1,5 @@
 <template>
-  <ContainerComponents
-    ref="container"
-    :editing="false">
+  <ContainerComponents :config="containerConfig">
 
   </ContainerComponents>
 </template>
@@ -10,11 +8,19 @@
 import ContainerComponents from '@/components/Container';
 import Element from '@/components/Element';
 import AppConfig from '@/assets/js/entities/AppConfig';
-import Container from '@/assets/js/entities/Container';
+import ContainerConfig from '@/assets/js/entities/Container';
 
 export default {
   components: {
     ContainerComponents,
+  },
+  data() {
+    return {
+      containerConfig: new ContainerConfig({
+        $isGridVisible: false,
+        $editable: false,
+      }),
+    };
   },
   mounted() {
     this.init();
@@ -35,10 +41,7 @@ export default {
       // 初始化容器
       const { container: containerConfig } = config;
       document.title = `${containerConfig.name} - ${containerConfig.desc}`;
-      const container = new Container({
-        $el: this.$refs.container.$el, // $开头的参数不参与序列化
-        ...containerConfig,
-      });
+      this.containerConfig.setOptions(containerConfig);
     },
   },
 };

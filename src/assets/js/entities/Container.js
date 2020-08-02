@@ -10,18 +10,21 @@ const defaultOptions = () => ({
     height: 1080,
   },
   background: {
-    color: '#000000',
+    color: '#000',
   },
   elements: [],
-  $isGridVisible: true,
+  $scale: 1,
+  $isGridVisible: false,
 });
 
 export default class Container {
   constructor(options = {}) {
+    this.setOptions(options);
+  }
+
+  setOptions(options) {
     const mergedOptions = { ...defaultOptions(), ...options };
     Object.assign(this, mergedOptions);
-    // 渲染容器
-    this.render();
     if (this.elements.length > 0) {
       // 如果传参中含有elements，则立即渲染
       const elements = this.elements.map(ele => {
@@ -31,6 +34,9 @@ export default class Container {
       });
       this.elements = elements;
     }
+    if (this.$el) {
+      this.mount(this.$el);
+    }
   }
 
   toJSON() {
@@ -39,15 +45,23 @@ export default class Container {
 
   setWidth(width) {
     this.size.width = width;
+    this.$el.style.width = `${width}px`;
   }
 
   setHeight(height) {
     this.size.height = height;
+    this.$el.style.height = `${height}px`;
   }
 
   setBackgroundColor(color) {
     this.background.color = color;
     this.$el.style.backgroundColor = `${color}`;
+  }
+
+  mount(el) {
+    this.$el = el;
+    // 渲染
+    this.render();
   }
 
   render() {
@@ -59,6 +73,25 @@ export default class Container {
     this.$el.style.width = `${width}px`;
     this.$el.style.height = `${height}px`;
     this.$el.style.backgroundColor = `${color}`;
+    // 是否自适应
+    if (this.$adaptive) {
+      // 设置缩放比例，根据外容器当前的宽度来决定
+      this.setInitScale();
+    }
+  }
+
+  setInitScale() {
+    const wrapperWidth = parseInt(
+      getComputedStyle(this.$el.parentElement, false).width,
+      10,
+    ); // 外容器的宽度
+    const scale = wrapperWidth / this.$el.offsetWidth;
+    this.setScale(scale);
+  }
+
+  setScale(scale) {
+    this.$scale = scale;
+    this.$el.style.transform = `scale(${scale})`;
   }
 
   // 添加元素

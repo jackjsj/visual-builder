@@ -1,29 +1,23 @@
 <template>
   <div class="container">
-    <div class="grid-overlay" v-show="isGridVisible"></div>
+    <div class="grid-overlay" v-show="config.$isGridVisible"></div>
     <slot></slot>
-
   </div>
 </template>
 
 <script>
+import ContainerConfig from 'entities/Container';
+
 export default {
   props: {
-    editing: {
-      type: Boolean,
-      default() {
-        return true;
-      },
-    },
-    isGridVisible: {
-      type: Boolean,
-      default() {
-        return false;
-      },
+    config: {
+      type: ContainerConfig,
+      required: true,
     },
   },
-  mounted() {},
-  methods: {},
+  mounted() {
+    this.config.mount(this.$el);
+  },
 };
 </script>
 

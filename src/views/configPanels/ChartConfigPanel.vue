@@ -17,30 +17,25 @@
           <a-divider dashed></a-divider>
           <a-form-item label="宽度(px)">
             <a-input-number :min="100" style="width:100%"
-              v-model="options.size.width"
-              @change="options.setWidth(options.size.width)" />
+              v-model="width" />
           </a-form-item>
           <a-form-item label="高度(px)">
             <a-input-number :min="100" style="width:100%"
-              v-model="options.size.height"
-              @change="options.setHeight(options.size.height)" />
+              v-model="height" />
           </a-form-item>
           <a-divider dashed></a-divider>
           <a-form-item label="X坐标(px)">
             <a-input-number style="width:100%"
-              v-model="options.position.left"
-              @change="options.setLeft(options.position.left)" />
+              v-model="left" />
           </a-form-item>
           <a-form-item label="Y坐标(px)">
             <a-input-number style="width:100%"
-              v-model="options.position.top"
-              @change="options.setTop(options.position.top)" />
+              v-model="top" />
           </a-form-item>
           <a-divider dashed></a-divider>
           <a-form-item label="背景颜色">
             <color-picker
-              :value="options.background.color"
-              @input="onColorChange"></color-picker>
+              v-model="backgroundColor" />
           </a-form-item>
         </a-form>
       </a-tab-pane>

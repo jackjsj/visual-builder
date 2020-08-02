@@ -4,11 +4,9 @@ import Vue from 'vue';
 Vue.directive('dragable', {
   inserted(el, binding) {
     const callbacks = binding.value;
-    const { zIndex } = el.style;
 
     el.onmousedown = e => {
       // 记录初始位置
-      el.style.zIndex = '10000';
       function move(ev) {
         // 计算缩放比例，因为可能元素是被transform:scale()处理过的
         const rate = el.getBoundingClientRect().width / el.offsetWidth;
@@ -20,15 +18,16 @@ Vue.directive('dragable', {
       }
       document.onmousemove = move;
       document.onmouseup = () => {
-        callbacks.onDragEnd({
-          left: el.offsetLeft,
-          top: el.offsetTop,
-        });
-        el.style.zIndex = zIndex;
+        callbacks.onDragEnd &&
+          callbacks.onDragEnd({
+            left: el.offsetLeft,
+            top: el.offsetTop,
+          });
         document.onmousemove = null;
         document.onmouseup = null;
       };
       return false;
     };
   },
+
 });

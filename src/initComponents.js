@@ -9,7 +9,6 @@ import {
   Select,
   Button,
   Alert,
-  Icon,
 } from 'ant-design-vue';
 
 Vue.use(Form)
@@ -20,5 +19,4 @@ Vue.use(Form)
   .use(Select)
   .use(Button)
   .use(Alert)
-  .use(Icon)
   .use(Switch);

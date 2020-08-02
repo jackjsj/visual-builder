@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import ElementComponent from '@/components/Element';
 import echarts from 'echarts';
+import store from '@/store';
 import { toJSON } from '../utils';
 
 let elementId = 0;
@@ -96,42 +97,45 @@ export default class Element {
 
   // 渲染方法
   render() {
-    const { $editable } = this; // 大小，位置
-    const element = this;
+    const elementConfig = this;
     // 创建Vue实例并挂载到容器中
     const ElementConstructor = Vue.extend(ElementComponent);
     const elementVM = new ElementConstructor({
+      store,
       propsData: {
-        editable: $editable,
+        config: this,
+      },
+      props: {
+        config: {
+          type: Element,
+          required: true,
+        },
       },
       created() {
-        if ($editable) {
+        if (elementConfig.$editable) {
           // 设置拖拽回调
           this.callbacks = {
             onDragEnd: ({ top, left }) => {
               // 修改相应配置
-              element.setTop(top);
-              element.setLeft(left);
+              elementConfig.setTop(top);
+              elementConfig.setLeft(left);
             },
             resized: ({ width, height }) => {
               // 设置大小调节回调
-              element.setWidth(width);
-              element.setHeight(height);
-              element.fill();
+              elementConfig.setWidth(width);
+              elementConfig.setHeight(height);
+              elementConfig.fill();
             },
           };
         }
       },
     });
     elementVM.$mount(); // vue 实例挂载
-    const el = elementVM.$el;
-    this.$el = el;
+    this.$el = elementVM.$el;
     this.$elementVM = elementVM; // 在配置实例上添加一个指针指向对应的 vue实例
-    elementVM.$target = this; // 在vue实例上添加一个指针指向配置实例本身
     this.setStyle();
     // 将指定类型的内容填充到元素中
     this.fill();
-    return el; // 返回一个el
   }
 
   // 将当前元素在所在的容器中拷贝一份
@@ -170,7 +174,7 @@ export default class Element {
 
   // 自毁方法
   destroy() {
-    this.$container.removeElement(this); // 从容器配置实例中删除
-    this.$elementVM.$destroy(); // vue实例销毁
+    this.$container.removeElement(this); // 从容器配置实例中删除当前元素
+    this.$el.remove();
   }
 }

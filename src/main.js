@@ -7,7 +7,6 @@ import './initComponents'; // 初始加载的ant-design-vue 组件，考虑到�
 
 Vue.config.productionTip = false;
 
-console.log(store);
 
 new Vue({
   store,

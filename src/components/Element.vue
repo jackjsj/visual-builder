@@ -1,7 +1,7 @@
 <template>
   <!-- 编辑状态 keydown添加prevent，避免页面滚动 -->
   <div tabIndex="0"
-    class="element editing" v-dragable="callbacks" v-if="editable"
+    class="element editing" v-dragable="callbacks" v-if="config.$editable"
     @mousedown="onElementClick"
     @keydown="onKeyDown"
     :class="{active}">
@@ -46,7 +46,6 @@
 import '@/directives/dragable';
 import '@/directives/resizable';
 import { Icon, Popconfirm } from 'ant-design-vue';
-import store from '@/store';
 
 export default {
   components: {
@@ -64,15 +63,8 @@ export default {
     // 监听当前元素的样式变化;
     this.observerElStyleChange();
   },
-  props: {
-    editable: {
-      type: Boolean,
-      default() {
-        return false;
-      },
-    },
-  },
   methods: {
+    // 监听样式变化
     observerElStyleChange() {
       const observer = new MutationObserver(mutations => {
         mutations.forEach(({ type, attributeName, target }) => {
@@ -88,27 +80,34 @@ export default {
       });
     },
     deleteElement() {
-      this.$el.remove();
-      this.$target.destroy();
+      this.$el.offsetParent.click();
+      this.config.destroy();
+      this.$destroy();
     },
     copyElement() {
-      this.$target.copy();
+      this.config.copy();
+    },
+    onParentClick(e) {
+      const el = this.$el;
+      if (!e.path.includes(el)) {
+        this.active = false;
+        const targetIndex = this.$store.state.activeElements.indexOf(
+          this.config,
+        );
+        this.$store.state.activeElements.splice(targetIndex, 1);
+        el.blur();
+        el.offsetParent.removeEventListener('click', this.onParentClick);
+      }
     },
     onElementClick() {
       this.active = true;
       const el = this.$el;
       el.focus();
-      store.state.activeElements.push(this.$target);
-      const onParentClick = e => {
-        if (!e.path.includes(el)) {
-          this.active = false;
-          const targetIndex = store.state.activeElements.indexOf(this.$target);
-          store.state.activeElements.splice(targetIndex, 1);
-          el.blur();
-          el.offsetParent.removeEventListener('click', onParentClick);
-        }
-      };
-      el.offsetParent.addEventListener('click', onParentClick);
+      if (!this.$store.state.activeElements.includes(this.config)) {
+        this.$store.state.activeElements.push(this.config);
+      }
+      console.log(this.$store.state.activeElements);
+      el.offsetParent.addEventListener('click', this.onParentClick);
     },
     onKeyDown(e) {
       const { code } = e;
@@ -121,16 +120,16 @@ export default {
       this.$refs.delBtn.$el.click();
     },
     onArrowUp() {
-      this.$target.moveToTop(-1);
+      this.config.moveToTop(-1);
     },
     onArrowDown() {
-      this.$target.moveToTop(1);
+      this.config.moveToTop(1);
     },
     onArrowLeft() {
-      this.$target.moveToLeft(-1);
+      this.config.moveToLeft(-1);
     },
     onArrowRight() {
-      this.$target.moveToLeft(1);
+      this.config.moveToLeft(1);
     },
   },
 };
@@ -213,8 +212,8 @@ export default {
         background: #09f;
         display: flex;
         align-items: center;
+        z-index: 1;
         justify-content: center;
-        z-index: 10001;
         margin-left: 10px;
         font-size: 20px;
         cursor: pointer;

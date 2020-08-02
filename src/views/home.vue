@@ -24,7 +24,7 @@
         <div class="zoom-ctrl flex aic flex-none">
           <span>面板缩放百分比</span>
           <div class="flex1 ml10">
-            <a-slider v-model="scalePercentage"
+            <a-slider v-model="scale"
               :max="200"
               :min="10"></a-slider>
           </div>
@@ -34,10 +34,9 @@
           </div>
         </div>
         <!-- 这里要根据当前center 的宽度，来按比例缩放 -->
-        <div class="flex1 container-wrapper ova" ref="wrapper">
+        <div class="flex1 container-wrapper ova rel">
           <ContainerComponent
-            ref="container" :isGridVisible="isGridVisible">
-          </ContainerComponent>
+            :config="containerConfig" />
         </div>
       </div>
       <div class="right ova">
@@ -56,7 +55,7 @@ import ContainerComponent from '@/components/Container';
 import echarts from 'echarts';
 import { Slider, Icon } from 'ant-design-vue';
 import AppConfig from 'entities/AppConfig';
-import Container from 'entities/Container';
+import ContainerConfig from 'entities/Container';
 import Element from 'entities/Element';
 import ContainerConfigPanel from './configPanels/ContainerConfigPanel';
 import ChartConfigPanel from './configPanels/ChartConfigPanel';
@@ -71,47 +70,41 @@ export default {
   },
   data() {
     return {
-      scalePercentage: 100,
-      containerConfig: undefined,
-      isGridVisible: true,
+      containerConfig: new ContainerConfig({
+        $isGridVisible: true,
+        $adaptive: true,
+      }),
     };
   },
-  watch: {
-    scalePercentage(newValue) {
-      this.containerEl.style.transform = `scale(${newValue / 100})`;
+  computed: {
+    scale: {
+      get() {
+        return this.containerConfig.$scale * 100;
+      },
+      set(scalePercentage) {
+        this.containerConfig.setScale(scalePercentage / 100);
+      },
     },
   },
   mounted() {
     this.init();
+    // 测试
     this.addElement('chart');
   },
   methods: {
     // 初始化
     init() {
-      this.containerEl = this.$refs.container.$el;
       // 初始化配置
-      const containerConfig = new Container({
-        $el: this.containerEl, // 以$开头的参数将不进行序列化
-      });
-      this.containerConfig = containerConfig;
       const appConfig = new AppConfig({
-        container: containerConfig,
+        container: this.containerConfig,
       });
       Vue.prototype.$appConfig = appConfig;
-      this.initScale();
     },
     // 初始化缩放比例
     initScale() {
-      // 设置缩放比例，根据外容器当前的宽度来决定
-      const wrapperWidth = parseInt(
-        getComputedStyle(this.$refs.wrapper, false).width,
-        10,
-      ); // 外容器的宽度
-      const scale = wrapperWidth / this.containerEl.offsetWidth;
-      // 计算默认的缩放比例
-      this.containerEl.style.transform = `scale(${scale})`;
-      this.scalePercentage = scale * 100;
+      this.containerConfig.setInitScale();
     },
+    // 构建应用
     buildApp() {
       // 将当前配置保存
       this.saveConfig();
@@ -121,9 +114,11 @@ export default {
       });
       window.open(url.href, '_blank');
     },
+    // 保存配置到缓存
     saveConfig() {
       localStorage.setItem('appConfig', JSON.stringify(this.$appConfig));
     },
+    // 添加一个元素
     addElement(type) {
       // 添加相应配置
       this.$appConfig.getContainer().addElement(
@@ -173,7 +168,6 @@ export default {
     onContainerConfigChange(options) {
       // 触发容器渲染
       this.$appConfig.getContainer().render();
-      this.isGridVisible = options.$isGridVisible;
     },
     onChartConfigChange(options) {
       // 触发当前元素渲染
