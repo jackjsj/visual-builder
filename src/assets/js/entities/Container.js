@@ -3,25 +3,30 @@ import Element from './Element';
 
 // 默认配置
 const defaultOptions = () => ({
+  name: '未命名',
+  desc: '这是一个大屏数据可视化应用',
   size: {
     width: 1920,
     height: 1080,
   },
   background: {
-    color: '#000',
+    color: '#000000',
   },
   elements: [],
+  $isGridVisible: true,
 });
 
 export default class Container {
   constructor(options = {}) {
     const mergedOptions = { ...defaultOptions(), ...options };
     Object.assign(this, mergedOptions);
+    // 渲染容器
+    this.render();
     if (this.elements.length > 0) {
       // 如果传参中含有elements，则立即渲染
       const elements = this.elements.map(ele => {
         const element = new Element(ele);
-        this.renderElement(element);
+        this.$el.appendChild(element.$el);
         return element;
       });
       this.elements = elements;
@@ -44,22 +49,54 @@ export default class Container {
     this.background.color = color;
   }
 
+  render() {
+    // 获取容器宽高
+    const { width, height } = this.size;
+    // 获取背景颜色
+    const { color } = this.background;
+    // 设置
+    this.$el.style.width = `${width}px`;
+    this.$el.style.height = `${height}px`;
+    this.$el.style.backgroundColor = `${color}`;
+  }
+
   // 添加元素
   addElement(element) {
+    // 根据当前配置分配一个合理的位置
+    const position = this.getReasonablePosition(element);
+    element.setPosition(position);
+    // 给element 配置实例添加一个指针指向 container 配置实例
+    element.setContainer(this);
     this.elements.push(element);
-    this.renderElement(element);
+    this.$el.appendChild(element.$el);
   }
 
-  renderElements(elements) {
-    elements.forEach(ele => {
-      this.renderElement(ele);
-    });
+  getReasonablePosition(element) {
+    // 位置分配策略：默认是30，30，如果已存在，则在此基础上增加30，30，如果依然存在，则一直循环，直到找到合理的位置为止。
+    const elements = this.getElements(); // 获取已存在的元素
+    const existedPositions = elements.map(
+      ele => `${ele.getLeft()}x${ele.getTop()}`,
+    ); // 获取已存在的位置
+    const pos = element.position || {
+      left: 30,
+      top: 30,
+    };
+    while (true) {
+      const _pos = `${pos.left}x${pos.top}`;
+      if (existedPositions.includes(_pos)) {
+        pos.left += 30;
+        pos.top += 30;
+      } else {
+        return pos;
+      }
+    }
   }
 
-  renderElement(element) {
-    // 根据配置创建元素
-    const el = element.render();
-    this.$el.appendChild(el);
+  removeElement(element) {
+    const targetIndex = this.elements.indexOf(element);
+    if (targetIndex > -1) {
+      this.elements.splice(targetIndex, 1);
+    }
   }
 
   getElements() {

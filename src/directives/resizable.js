@@ -29,7 +29,6 @@ Vue.directive('resizable', {
         }
       };
       document.onmouseup = () => {
-
         callbacks.resized({
           width: targetBox.offsetWidth,
           height: targetBox.offsetHeight,

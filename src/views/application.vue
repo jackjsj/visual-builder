@@ -1,9 +1,7 @@
 <template>
   <ContainerComponents
     ref="container"
-    :editing="false"
-    :width="width"
-    :height="height">
+    :editing="false">
 
   </ContainerComponents>
 </template>
@@ -18,16 +16,9 @@ export default {
   components: {
     ContainerComponents,
   },
-  data() {
-    return {
-      width: 1920,
-      height: 1080,
-    };
-  },
   mounted() {
     this.init();
   },
-
   methods: {
     init() {
       // 从缓存中读取配置
@@ -42,9 +33,11 @@ export default {
     // 构建应用
     build(config) {
       // 初始化容器
+      const { container: containerConfig } = config;
+      document.title = `${containerConfig.name} - ${containerConfig.desc}`;
       const container = new Container({
         $el: this.$refs.container.$el, // $开头的参数不参与序列化
-        ...config.container,
+        ...containerConfig,
       });
     },
   },

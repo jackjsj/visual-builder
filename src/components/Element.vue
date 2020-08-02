@@ -1,7 +1,9 @@
 <template>
-  <!-- 编辑状态 -->
-  <div class="element editing" v-dragable="callbacks" v-if="editable"
+  <!-- 编辑状态 keydown添加prevent，避免页面滚动 -->
+  <div tabIndex="0"
+    class="element editing" v-dragable="callbacks" v-if="editable"
     @mousedown="onElementClick"
+    @keydown="onKeyDown"
     :class="{active}">
     <!-- element 激活状态下显示的 -->
     <div class="width-resizer" v-resizable:w="callbacks">
@@ -13,8 +15,21 @@
     <div class="wh-resizer" v-resizable:wh="callbacks">
       <!-- 宽高调节器 -->
     </div>
-    <div class="offset-line" :coord="`${left}, ${top}`">
+    <div class="offset-line" :coord="coord">
       <!-- 指示线 -->
+    </div>
+    <div class="active-btn-group abs flex aic" v-show="active">
+      <div class="active-btn del-btn">
+        <a-popconfirm title="确定要删除此元素吗？"
+          ok-text="确定"
+          cancel-text="取消"
+          @confirm="deleteElement">
+          <a-icon type="delete" title="删除" ref="delBtn"></a-icon>
+        </a-popconfirm>
+      </div>
+      <div class="active-btn copy-btn" @click="copyElement">
+        <a-icon type="copy" title="复制"></a-icon>
+      </div>
     </div>
     <div class="w100p h100p rel" ref="content">
       这是一个空的元素
@@ -30,15 +45,24 @@
 <script>
 import '@/directives/dragable';
 import '@/directives/resizable';
+import { Icon, Popconfirm } from 'ant-design-vue';
+import store from '@/store';
 
 export default {
+  components: {
+    'a-icon': Icon,
+    'a-popconfirm': Popconfirm,
+  },
   data() {
     return {
-      top: 20,
-      left: 20,
       callbacks: {},
       active: false,
+      coord: '',
     };
+  },
+  mounted() {
+    // 监听当前元素的样式变化;
+    this.observerElStyleChange();
   },
   props: {
     editable: {
@@ -49,16 +73,64 @@ export default {
     },
   },
   methods: {
+    observerElStyleChange() {
+      const observer = new MutationObserver(mutations => {
+        mutations.forEach(({ type, attributeName, target }) => {
+          if (type === 'attributes' && attributeName === 'style') {
+            const { offsetLeft: left, offsetTop: top } = target;
+            this.coord = `${left}, ${top}`;
+          }
+        });
+      });
+      observer.observe(this.$el, {
+        attributes: true,
+        attributeFilter: ['style'],
+      });
+    },
+    deleteElement() {
+      this.$el.remove();
+      this.$target.destroy();
+    },
+    copyElement() {
+      this.$target.copy();
+    },
     onElementClick() {
       this.active = true;
       const el = this.$el;
-      const onDocumentClick = e => {
+      el.focus();
+      store.state.activeElements.push(this.$target);
+      const onParentClick = e => {
         if (!e.path.includes(el)) {
           this.active = false;
-          document.removeEventListener('click', onDocumentClick);
+          const targetIndex = store.state.activeElements.indexOf(this.$target);
+          store.state.activeElements.splice(targetIndex, 1);
+          el.blur();
+          el.offsetParent.removeEventListener('click', onParentClick);
         }
       };
-      document.addEventListener('click', onDocumentClick);
+      el.offsetParent.addEventListener('click', onParentClick);
+    },
+    onKeyDown(e) {
+      const { code } = e;
+      if (this[`on${code}`]) {
+        e.preventDefault();
+        this[`on${code}`]();
+      }
+    },
+    onDelete() {
+      this.$refs.delBtn.$el.click();
+    },
+    onArrowUp() {
+      this.$target.moveToTop(-1);
+    },
+    onArrowDown() {
+      this.$target.moveToTop(1);
+    },
+    onArrowLeft() {
+      this.$target.moveToLeft(-1);
+    },
+    onArrowRight() {
+      this.$target.moveToLeft(1);
     },
   },
 };
@@ -71,7 +143,7 @@ export default {
   left: 20px;
   width: 600px;
   height: 400px;
-  background: rgba(0, 153, 255, 0.1);
+  background: rgba(0, 0, 0, 0.8);
   border: 2px solid transparent;
   &.editing {
     &:hover {
@@ -132,6 +204,21 @@ export default {
           color: #09f;
           content: attr(coord);
         }
+      }
+      .active-btn-group {
+        right: 0;
+      }
+      .active-btn {
+        width: 28px;
+        height: 28px;
+        background: #09f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+        margin-left: 10px;
+        font-size: 20px;
+        cursor: pointer;
       }
     }
     &.resizing {

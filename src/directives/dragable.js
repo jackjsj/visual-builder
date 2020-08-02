@@ -17,10 +17,6 @@ Vue.directive('dragable', {
         // 计算移动后的top left
         el.style.top = `${top}px`;
         el.style.left = `${left}px`;
-        callbacks.onDrag({
-          left: el.offsetLeft,
-          top: el.offsetTop,
-        });
       }
       document.onmousemove = move;
       document.onmouseup = () => {

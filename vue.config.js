@@ -27,10 +27,6 @@ module.exports = {
         alias: {
           // 优化：使用ant-design-vue中的moment，这样可避免重复打包
           // moment: 'ant-design-vue/node_modules/moment',
-          '@ant-design/icons/lib/dist$': path.resolve(
-            __dirname,
-            './src/antdIcons.js',
-          ),
           entities: path.resolve(__dirname, './src/assets/js/entities'),
         },
       },

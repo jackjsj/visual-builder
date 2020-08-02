@@ -2,7 +2,7 @@
   <div class="home flex-col">
     <div class="header flex aic flex-none jcb">
       <div class="logo">
-        大屏可视化平台
+        大屏可视化应用构建平台
       </div>
       <!-- 插入元素工具 -->
       <div>
@@ -19,16 +19,32 @@
       <!-- <div class="left">
         图层管理
       </div> -->
-      <div class="center ova rel">
+      <div class="center ova rel flex-col">
+        <!-- 缩放控制器 -->
+        <div class="zoom-ctrl flex aic flex-none">
+          <span>面板缩放百分比</span>
+          <div class="flex1 ml10">
+            <a-slider v-model="scalePercentage"
+              :max="200"
+              :min="10"></a-slider>
+          </div>
+          <div class="fit-btn ml10 poi f18 flex aic jcc"
+            @click="initScale">
+            <a-icon type="shrink" />
+          </div>
+        </div>
         <!-- 这里要根据当前center 的宽度，来按比例缩放 -->
-        <ContainerComponent ref="container" :isGridVisible="true">
-          <!-- <Element>
-            <div id="chart" style="width:100%;height:100%;"></div>
-          </Element> -->
-        </ContainerComponent>
+        <div class="flex1 container-wrapper ova" ref="wrapper">
+          <ContainerComponent
+            ref="container" :isGridVisible="isGridVisible">
+          </ContainerComponent>
+        </div>
       </div>
       <div class="right">
-        <div class="sub-title">配置</div>
+        <ContainerConfigPanel :options="containerConfig"
+          @change="onContainerConfigChange" v-if="$store.state.activeElements.length === 0" />
+        <ChartConfigPanel v-else :options="$store.state.activeElements[0]"
+          @change="onChartConfigChange" />
       </div>
     </div>
   </div>
@@ -37,68 +53,76 @@
 <script>
 import Vue from 'vue';
 import ContainerComponent from '@/components/Container';
-
 import echarts from 'echarts';
-import { Button } from 'ant-design-vue';
+import { Slider, Icon } from 'ant-design-vue';
 import AppConfig from 'entities/AppConfig';
 import Container from 'entities/Container';
 import Element from 'entities/Element';
+import ContainerConfigPanel from './configPanels/ContainerConfigPanel';
+import ChartConfigPanel from './configPanels/ChartConfigPanel';
 
 export default {
   components: {
     ContainerComponent,
-    'a-button': Button,
+    ContainerConfigPanel,
+    ChartConfigPanel,
+    'a-slider': Slider,
+    'a-icon': Icon,
   },
   data() {
-    return {};
+    return {
+      scalePercentage: 100,
+      containerConfig: undefined,
+      isGridVisible: true,
+    };
+  },
+  watch: {
+    scalePercentage(newValue) {
+      this.containerEl.style.transform = `scale(${newValue / 100})`;
+    },
   },
   mounted() {
     this.init();
-    // // 基于准备好的dom，初始化echarts实例
-    // const myChart = echarts.init(document.getElementById('chart'));
-
-    // // 指定图表的配置项和数据
-    // const option = {
-    //   title: {
-    //     text: 'ECharts 入门示例',
-    //   },
-    //   tooltip: {},
-    //   legend: {
-    //     data: ['销量'],
-    //   },
-    //   xAxis: {
-    //     data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子'],
-    //   },
-    //   yAxis: {},
-    //   series: [
-    //     {
-    //       name: '销量',
-    //       type: 'bar',
-    //       data: [5, 20, 36, 10, 10, 20],
-    //     },
-    //   ],
-    // };
-
-    // // 使用刚指定的配置项和数据显示图表。
-    // myChart.setOption(option);
+    this.addElement('chart');
   },
   methods: {
-    // 初始化配置
+    // 初始化
     init() {
+      this.containerEl = this.$refs.container.$el;
+      // 初始化配置
+      const containerConfig = new Container({
+        $el: this.containerEl, // 以$开头的参数将不进行序列化
+      });
+      this.containerConfig = containerConfig;
       const appConfig = new AppConfig({
-        container: new Container({
-          $el: this.$refs.container.$el, // 以$开头的参数将不进行序列化
-        }),
+        container: containerConfig,
       });
       Vue.prototype.$appConfig = appConfig;
+      this.initScale();
+    },
+    // 初始化缩放比例
+    initScale() {
+      // 设置缩放比例，根据外容器当前的宽度来决定
+      const wrapperWidth = parseInt(
+        getComputedStyle(this.$refs.wrapper, false).width,
+        10,
+      ); // 外容器的宽度
+      const scale = wrapperWidth / this.containerEl.offsetWidth;
+      // 计算默认的缩放比例
+      this.containerEl.style.transform = `scale(${scale})`;
+      this.scalePercentage = scale * 100;
     },
     buildApp() {
       // 将当前配置保存
       this.saveConfig();
+      // 打开页面
+      const url = this.$router.resolve({
+        path: 'application',
+      });
+      window.open(url.href, '_blank');
     },
     saveConfig() {
       localStorage.setItem('appConfig', JSON.stringify(this.$appConfig));
-      this.$router.push('application');
     },
     addElement(type) {
       // 添加相应配置
@@ -106,18 +130,35 @@ export default {
         new Element({
           $editable: true, // 以$开头的参数将不进行序列化
           type,
+          name: '柱状图',
           chartOption: {
             title: {
               text: 'ECharts 入门示例',
+              textStyle: {
+                color: '#fff',
+              },
             },
-            tooltip: {},
             legend: {
               data: ['销量'],
+              textStyle: {
+                color: '#fff',
+              },
             },
             xAxis: {
               data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子'],
+              axisLabel: {
+                textStyle: {
+                  color: '#fff',
+                },
+              },
             },
-            yAxis: {},
+            yAxis: {
+              axisLabel: {
+                textStyle: {
+                  color: '#fff',
+                },
+              },
+            },
             series: [
               {
                 name: '销量',
@@ -128,6 +169,15 @@ export default {
           },
         }),
       );
+    },
+    onContainerConfigChange(options) {
+      // 触发容器渲染
+      this.$appConfig.getContainer().render();
+      this.isGridVisible = options.$isGridVisible;
+    },
+    onChartConfigChange(options) {
+      // 触发当前元素渲染
+      options.render();
     },
   },
 };
@@ -153,18 +203,30 @@ export default {
 }
 .center {
   flex: 1;
-  padding: 40px;
-  box-sizing: content-box;
+  .container-wrapper {
+    padding: 0 20px;
+    box-sizing: content-box;
+  }
 }
 .right {
   width: 372px;
   border-left: 2px solid #c5c5c5;
 }
-.sub-title {
-  height: 40px;
-  line-height: 40px;
-  background: #ddd;
-  font-size: 20px;
-  padding: 0 10px;
+
+.zoom-ctrl {
+  width: 300px;
+  height: 58px;
+  margin-left: 20px;
+  .fit-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: rgba(0, 153, 255, 0.6);
+    transition: 0.3s;
+    color: #fff;
+    &:hover {
+      background: #09f;
+    }
+  }
 }
 </style>
