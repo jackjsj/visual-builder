@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" :style="style">
     <div class="grid-overlay" v-show="config.$isGridVisible"></div>
     <slot></slot>
   </div>
@@ -13,6 +13,15 @@ export default {
     config: {
       type: ContainerConfig,
       required: true,
+    },
+  },
+  computed: {
+    style() {
+      return {
+        width: `${this.config.getWidth()}px`,
+        height: `${this.config.getHeight()}px`,
+        backgroundColor: this.config.getBackgroundColor(),
+      };
     },
   },
   mounted() {

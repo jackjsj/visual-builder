@@ -43,19 +43,28 @@ export default class Container {
     return toJSON(this);
   }
 
+  getWidth() {
+    return this.size.width;
+  }
+
   setWidth(width) {
     this.size.width = width;
-    this.$el.style.width = `${width}px`;
+  }
+
+  getHeight() {
+    return this.size.height;
   }
 
   setHeight(height) {
     this.size.height = height;
-    this.$el.style.height = `${height}px`;
+  }
+
+  getBackgroundColor() {
+    return this.background.color;
   }
 
   setBackgroundColor(color) {
     this.background.color = color;
-    this.$el.style.backgroundColor = `${color}`;
   }
 
   mount(el) {

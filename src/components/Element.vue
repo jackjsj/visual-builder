@@ -1,6 +1,7 @@
 <template>
   <!-- 编辑状态 keydown添加prevent，避免页面滚动 -->
   <div tabIndex="0"
+    :style="style"
     class="element editing" v-dragable="callbacks" v-if="config.$editable"
     @mousedown="onElementClick"
     @keydown="onKeyDown"
@@ -36,7 +37,9 @@
     </div>
   </div>
   <!-- 非编辑状态 -->
-  <div class="element" v-else>
+  <div class="element"
+    :style="style"
+    v-else>
     <div class="w100p h100p rel" ref="content">
     </div>
   </div>
@@ -58,6 +61,17 @@ export default {
       active: false,
       coord: '',
     };
+  },
+  computed: {
+    style() {
+      return {
+        width: `${this.config.getWidth()}px`,
+        height: `${this.config.getHeight()}px`,
+        top: `${this.config.getTop()}px`,
+        left: `${this.config.getLeft()}px`,
+        backgroundColor: this.config.getBackgroundColor(),
+      };
+    },
   },
   mounted() {
     // 监听当前元素的样式变化;

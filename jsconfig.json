@@ -4,6 +4,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "entities/*": [
+        "./src/assets/js/entities/*"
       ]
     },
     "target": "ES6",

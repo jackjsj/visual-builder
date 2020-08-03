@@ -27,7 +27,7 @@ export default {
         this.options.setWidth(width);
       },
       get() {
-        return this.options.size.width;
+        return this.options.getWidth();
       },
     },
     height: {
@@ -35,7 +35,7 @@ export default {
         this.options.setHeight(height);
       },
       get() {
-        return this.options.size.height;
+        return this.options.getHeight();
       },
     },
     left: {
@@ -43,7 +43,7 @@ export default {
         this.options.setLeft(left);
       },
       get() {
-        return this.options.position.left;
+        return this.options.getLeft();
       },
     },
     top: {
@@ -51,23 +51,18 @@ export default {
         this.options.setTop(top);
       },
       get() {
-        return this.options.position.top;
+        return this.options.getTop();
       },
     },
     backgroundColor: {
       set(color) {
-        this.onColorChange(color);
+        const { r, g, b, a } = color.rgba;
+        const colorStr = `rgba(${r},${g},${b},${a})`;
+        this.options.setBackgroundColor(colorStr);
       },
       get() {
-        return this.options.background.color;
+        return this.options.getBackgroundColor();
       },
-    },
-  },
-  methods: {
-    onColorChange(color) {
-      const { r, g, b, a } = color.rgba;
-      const colorStr = `rgba(${r},${g},${b},${a})`;
-      this.options.setBackgroundColor(colorStr);
     },
   },
 };

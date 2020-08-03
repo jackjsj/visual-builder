@@ -38,7 +38,6 @@ export default class Element {
 
   setTop(top) {
     this.position.top = top;
-    this.$el.style.top = `${top}px`;
   }
 
   getTop() {
@@ -47,7 +46,6 @@ export default class Element {
 
   setLeft(left) {
     this.position.left = left;
-    this.$el.style.left = `${left}px`;
   }
 
   getLeft() {
@@ -68,15 +66,21 @@ export default class Element {
     this.setTop(top);
   }
 
+  getWidth() {
+    return this.size.width;
+  }
+
   setWidth(width) {
     this.size.width = width;
-    this.$el.style.width = `${width}px`;
     this.fill();
+  }
+
+  getHeight() {
+    return this.size.height;
   }
 
   setHeight(height) {
     this.size.height = height;
-    this.$el.style.height = `${height}px`;
     this.fill();
   }
 
@@ -90,9 +94,12 @@ export default class Element {
     this.fill();
   }
 
+  getBackgroundColor() {
+    return this.background.color;
+  }
+
   setBackgroundColor(color) {
     this.background.color = color;
-    this.$el.style.backgroundColor = `${color}`;
   }
 
   // 渲染方法
