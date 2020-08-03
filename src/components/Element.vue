@@ -120,7 +120,6 @@ export default {
       if (!this.$store.state.activeElements.includes(this.config)) {
         this.$store.state.activeElements.push(this.config);
       }
-      console.log(this.$store.state.activeElements);
       el.offsetParent.addEventListener('click', this.onParentClick);
     },
     onKeyDown(e) {
