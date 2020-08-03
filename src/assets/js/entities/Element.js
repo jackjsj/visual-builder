@@ -19,6 +19,8 @@ const defaultOptions = () => ({
   background: {
     color: 'rgba(0, 0, 0, 0.8)',
   },
+  visible: true,
+  zIndex: 500,
 });
 
 export default class Element {
@@ -87,6 +89,22 @@ export default class Element {
   // 设置 element的容器配置实例
   setContainer(container) {
     this.$container = container;
+  }
+
+  getContainer() {
+    return this.$container;
+  }
+
+  getZIndex() {
+    let { zIndex } = this;
+    if (!this.getContainer()) return zIndex;
+    zIndex =
+      500 -
+      this.getContainer()
+        .getElementOrders()
+        .indexOf(this.id);
+    this.zIndex = zIndex;
+    return zIndex;
   }
 
   setChartOption(chartOption) {

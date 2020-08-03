@@ -1,10 +1,10 @@
 <template>
   <!-- 容器配置面板 -->
-  <div class="config-panel">
-    <div class="title">
+  <div class="config-panel flex-col ova h100p">
+    <div class="title flex-none">
       <slot name="header">{{$attrs.name}}</slot>
     </div>
-    <div class="content ova">
+    <div class="content flex1 ova">
       <slot></slot>
     </div>
   </div>

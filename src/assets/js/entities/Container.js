@@ -15,6 +15,7 @@ const defaultOptions = () => ({
   elements: [],
   $scale: 1,
   $isGridVisible: false,
+  elementOrders: [],
 });
 
 export default class Container {
@@ -67,6 +68,10 @@ export default class Container {
     this.background.color = color;
   }
 
+  getElementOrders() {
+    return this.elementOrders;
+  }
+
   mount(el) {
     this.$el = el;
     // 渲染
@@ -112,6 +117,7 @@ export default class Container {
     element.setContainer(this);
     this.elements.push(element);
     this.$el.appendChild(element.$el);
+    this.elementOrders.unshift(element.id); // 后加的元素放置在队首
   }
 
   getReasonablePosition(element) {
@@ -139,6 +145,10 @@ export default class Container {
     const targetIndex = this.elements.indexOf(element);
     if (targetIndex > -1) {
       this.elements.splice(targetIndex, 1);
+    }
+    const targetOrder = this.getElementOrders().indexOf(element.id);
+    if (targetOrder > -1) {
+      this.getElementOrders().splice(targetOrder, 1);
     }
   }
 

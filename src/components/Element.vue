@@ -49,6 +49,7 @@
 import '@/directives/dragable';
 import '@/directives/resizable';
 import { Icon, Popconfirm } from 'ant-design-vue';
+import { mapMutations, mapState } from 'vuex';
 
 export default {
   components: {
@@ -58,11 +59,11 @@ export default {
   data() {
     return {
       callbacks: {},
-      active: false,
       coord: '',
     };
   },
   computed: {
+    ...mapState(['activeElements']),
     style() {
       return {
         width: `${this.config.getWidth()}px`,
@@ -70,7 +71,12 @@ export default {
         top: `${this.config.getTop()}px`,
         left: `${this.config.getLeft()}px`,
         backgroundColor: this.config.getBackgroundColor(),
+        zIndex: this.config.getZIndex(),
+        display: this.config.visible ? 'block' : 'none',
       };
+    },
+    active() {
+      return this.activeElements.includes(this.config);
     },
   },
   mounted() {
@@ -78,6 +84,7 @@ export default {
     this.observerElStyleChange();
   },
   methods: {
+    ...mapMutations(['addActiveElement', 'removeActiveElement']),
     // 监听样式变化
     observerElStyleChange() {
       const observer = new MutationObserver(mutations => {
@@ -94,33 +101,16 @@ export default {
       });
     },
     deleteElement() {
-      this.$el.offsetParent.click();
+      this.config.getContainer().$el.click();
+      this.removeActiveElement(this.config);
       this.config.destroy();
       this.$destroy();
     },
     copyElement() {
       this.config.copy();
     },
-    onParentClick(e) {
-      const el = this.$el;
-      if (!e.path.includes(el)) {
-        this.active = false;
-        const targetIndex = this.$store.state.activeElements.indexOf(
-          this.config,
-        );
-        this.$store.state.activeElements.splice(targetIndex, 1);
-        el.blur();
-        el.offsetParent.removeEventListener('click', this.onParentClick);
-      }
-    },
     onElementClick() {
-      this.active = true;
-      const el = this.$el;
-      el.focus();
-      if (!this.$store.state.activeElements.includes(this.config)) {
-        this.$store.state.activeElements.push(this.config);
-      }
-      el.offsetParent.addEventListener('click', this.onParentClick);
+      this.addActiveElement(this.config);
     },
     onKeyDown(e) {
       const { code } = e;

@@ -16,9 +16,9 @@
       </div>
     </div>
     <div class="flex1 flex ovh">
-      <!-- <div class="left">
-        图层管理
-      </div> -->
+      <div class="left">
+        <LayerCtrlPanel :containerConfig="containerConfig" />
+      </div>
       <div class="center ova rel flex-col">
         <!-- 缩放控制器 -->
         <div class="zoom-ctrl flex aic flex-none">
@@ -53,20 +53,21 @@
 import Vue from 'vue';
 import ContainerComponent from '@/components/Container';
 import echarts from 'echarts';
-import { Slider, Icon } from 'ant-design-vue';
+import { Slider } from 'ant-design-vue';
 import AppConfig from 'entities/AppConfig';
 import ContainerConfig from 'entities/Container';
 import Element from 'entities/Element';
 import ContainerConfigPanel from './configPanels/ContainerConfigPanel';
 import ChartConfigPanel from './configPanels/ChartConfigPanel';
+import LayerCtrlPanel from './configPanels/LayerCtrlPanel';
 
 export default {
   components: {
     ContainerComponent,
     ContainerConfigPanel,
     ChartConfigPanel,
+    LayerCtrlPanel,
     'a-slider': Slider,
-    'a-icon': Icon,
   },
   data() {
     return {
@@ -120,12 +121,24 @@ export default {
     },
     // 添加一个元素
     addElement(type) {
+      // 取名
+      const defaultName = '未命名';
+      let name = defaultName;
+      let nameIndex = 1;
+      this.$appConfig
+        .getContainer()
+        .getElements()
+        .forEach(item => {
+          if (item.name === name) {
+            name = `未命名${nameIndex++}`;
+          }
+        });
       // 添加相应配置
       this.$appConfig.getContainer().addElement(
         new Element({
           $editable: true, // 以$开头的参数将不进行序列化
           type,
-          name: '柱状图',
+          name,
           chartOption: {
             title: {
               text: 'ECharts 入门示例',
