@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import _ from 'lodash';
 
 // 添加该指令后，元素可拖拽
 Vue.directive('resizable', {
@@ -11,10 +12,13 @@ Vue.directive('resizable', {
       e.stopPropagation();
       const targetBox = el.offsetParent;
       const { style } = targetBox;
-      // 鼠标按下时监听在文档中鼠标移动事件
-      document.onmousemove = ev => {
-        const width = targetBox.offsetWidth + ev.movementX / rate;
-        const height = targetBox.offsetHeight + ev.movementY / rate;
+      // 初始偏移量
+      let offsetX = 0;
+      let offsetY = 0;
+      // 节流函数
+      function setSize() {
+        const width = targetBox.offsetWidth + offsetX / rate;
+        const height = targetBox.offsetHeight + offsetY / rate;
         switch (type) {
           case 'w':
             style.width = `${width}px`;
@@ -27,12 +31,25 @@ Vue.directive('resizable', {
             style.height = `${height}px`;
             break;
         }
+        offsetX = 0;
+        offsetY = 0;
+      }
+      const setSizeThrottle = _.throttle(setSize, 30);
+      // 鼠标按下时监听在文档中鼠标移动事件
+      document.onmousemove = ev => {
+        offsetX += ev.movementX; // 累计偏移量X
+        offsetY += ev.movementY; // 累计偏移量Y
+        // console.log(offsetX);
+        // setSize();
+        setSizeThrottle();
       };
+
       document.onmouseup = () => {
-        callbacks.resized && callbacks.resized({
-          width: targetBox.offsetWidth,
-          height: targetBox.offsetHeight,
-        });
+        callbacks.resized &&
+          callbacks.resized({
+            width: targetBox.offsetWidth,
+            height: targetBox.offsetHeight,
+          });
         document.onmousemove = null;
         document.onmouseup = null;
       };

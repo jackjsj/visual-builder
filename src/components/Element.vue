@@ -32,7 +32,7 @@
         <a-icon type="copy" title="复制"></a-icon>
       </div>
     </div>
-    <div class="w100p h100p rel" ref="content">
+    <div class="w100p h100p rel ovh" ref="content">
       这是一个空的元素
     </div>
   </div>
@@ -40,7 +40,7 @@
   <div class="element"
     :style="style"
     v-else>
-    <div class="w100p h100p rel" ref="content">
+    <div class="w100p h100p rel ovh" ref="content">
     </div>
   </div>
 </template>
