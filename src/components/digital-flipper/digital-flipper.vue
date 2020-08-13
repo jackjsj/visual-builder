@@ -19,27 +19,13 @@ export default {
     return {
       options: new Array(10).fill().map((item, index) => index),
       nHeight: 0,
+      value: 0,
+      speed: 0.3,
     };
-  },
-  props: {
-    // 数值
-    value: {
-      type: Number,
-      default() {
-        return 0;
-      },
-    },
-    // 变换速度
-    speed: {
-      type: Number,
-      default() {
-        return 0.3;
-      },
-    },
   },
   computed: {
     numStr() {
-      return [...String(this.value)];
+      return [...String(this.value || 0)];
     },
     nStyle() {
       return n => {
@@ -57,13 +43,16 @@ export default {
   },
   mounted() {
     this.nHeight = this.$refs.n[0].offsetHeight;
+    setInterval(()=>{
+      this.value += parseInt(Math.random()*10);
+    },1000)
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .num {
-  flex:none;
+  flex: none;
   position: relative;
   width: 29px;
   height: 37px;

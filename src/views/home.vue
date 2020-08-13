@@ -59,11 +59,9 @@
       </div>
       <div class="right ova">
         <ContainerConfigPanel :options="containerConfig"
-          @change="onContainerConfigChange" v-if="$store.state.activeElements.length === 0" />
-        <ChartConfigPanel v-else-if="$store.state.activeElements[0].type==='chart'" :options="$store.state.activeElements[0]"
-          @change="onChartConfigChange" />
-        <DigitalFlipperConfigPanel v-else-if="$store.state.activeElements[0].type==='component'" :options="$store.state.activeElements[0]"
-          @change="onComponentConfigChange" />
+          v-if="$store.state.activeElements.length === 0" />
+        <ChartConfigPanel v-else-if="$store.state.activeElements[0].type==='chart'" :options="$store.state.activeElements[0]" />
+        <DigitalFlipperConfigPanel v-else-if="$store.state.activeElements[0].type==='component'" :options="$store.state.activeElements[0]" />
       </div>
     </div>
   </div>
@@ -112,7 +110,7 @@ export default {
   mounted() {
     this.init();
     // 测试
-    this.addElement('chart');
+    this.addElement('component','digital-flipper');
   },
   methods: {
     // 初始化
@@ -203,17 +201,6 @@ export default {
           }
         }),
       );
-    },
-    onContainerConfigChange(options) {
-      // 触发容器渲染
-      this.$appConfig.getContainer().render();
-    },
-    onChartConfigChange(options) {
-      // 触发当前元素渲染
-      options.render();
-    },
-    onComponentConfigChange(options){
-
     },
   },
 };

@@ -58,6 +58,12 @@ export default {
     'a-icon': Icon,
     'a-popconfirm': Popconfirm,
   },
+  props: {
+    config: {
+      type: require('@/assets/js/entities/Element').defalut,
+      required: true,
+    },
+  },
   data() {
     return {
       callbacks: {},

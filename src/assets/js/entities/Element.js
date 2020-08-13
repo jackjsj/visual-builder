@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import ElementComponent from '@/components/Element';
 import echarts from 'echarts';
 import store from '@/store';
 import { toJSON } from '../utils';
@@ -117,11 +116,6 @@ export default class Element {
     this.fill();
   }
 
-  setCompOption(compOption) {
-    this.compOption = compOption;
-    this.fill();
-  }
-
   getBackgroundColor() {
     return this.background.color;
   }
@@ -134,17 +128,12 @@ export default class Element {
   render() {
     const elementConfig = this;
     // 创建Vue实例并挂载到容器中
+    const ElementComponent = require('@/components/Element').default;
     const ElementConstructor = Vue.extend(ElementComponent);
     const elementVM = new ElementConstructor({
       store,
       propsData: {
         config: this,
-      },
-      props: {
-        config: {
-          type: Element,
-          required: true,
-        },
       },
       created() {
         if (elementConfig.$editable) {
@@ -205,20 +194,13 @@ export default class Element {
         chart.resize();
       } else if (type === 'component') {
         // 如果没有挂载组件，就初始化组件并挂载
-        if (!this.$elementVM.childVM) {
-          const comp = require(`@/components/${componentName}`).default;
-          const Ctor = Vue.extend(comp);
-          const vm = new Ctor({
-            propsData: compOption,
-          });
-          vm.$mount(this.$elementVM.$refs.content); // vue 实例挂载
-          this.$elementVM.childVM = vm;
-        } else {
-          // 如果已挂载了组件，就更新组件
-          for (const key in compOption) {
-            this.$elementVM.childVM.$props[key] = compOption[key];
-          }
-        }
+        const comp = require(`@/components/${componentName}/${componentName}`)
+          .default;
+        const Ctor = Vue.extend(comp);
+        const vm = new Ctor({
+          data: compOption,
+        });
+        vm.$mount(this.$elementVM.$refs.content);
       }
     });
   }

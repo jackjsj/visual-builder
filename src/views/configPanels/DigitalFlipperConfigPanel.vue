@@ -52,7 +52,7 @@
             </a-select>
           </a-form-item>
           <a-form-item label="数值">
-            <a-input-number style="width:100%"
+            <a-input-number style="width:100%" :min="0"
               v-model="value" />
           </a-form-item>
         </a-form>
@@ -74,9 +74,7 @@ export default {
   computed: {
     value:{
       set(val){
-        this.options.setCompOption({
-          value:val,
-        });
+        this.options.compOption.value = val;
       },
       get(){
         return this.options.compOption.value;
