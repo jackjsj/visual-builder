@@ -21,6 +21,7 @@ const defaultOptions = () => ({
   },
   visible: true,
   zIndex: 500,
+  compOption: {},
 });
 
 export default class Element {
@@ -73,8 +74,10 @@ export default class Element {
   }
 
   setWidth(width) {
-    this.size.width = width;
-    this.fill();
+    if (this.size.width !== width) {
+      this.size.width = width;
+      this.fill();
+    }
   }
 
   getHeight() {
@@ -82,8 +85,10 @@ export default class Element {
   }
 
   setHeight(height) {
-    this.size.height = height;
-    this.fill();
+    if (this.size.height !== height) {
+      this.size.height = height;
+      this.fill();
+    }
   }
 
   // 设置 element的容器配置实例
@@ -109,6 +114,11 @@ export default class Element {
 
   setChartOption(chartOption) {
     this.chartOption = chartOption;
+    this.fill();
+  }
+
+  setCompOption(compOption) {
+    this.compOption = compOption;
     this.fill();
   }
 
@@ -187,14 +197,30 @@ export default class Element {
   // 根据类型填充内容到元素中
   fill() {
     if (!this.$elementVM) return;
-    const { type, chartOption } = this; // 大小，位置
-    if (type === 'chart') {
-      this.$elementVM.$nextTick(() => {
+    this.$elementVM.$nextTick(() => {
+      const { type, componentName, chartOption, compOption } = this; // 大小，位置
+      if (type === 'chart') {
         const chart = echarts.init(this.$elementVM.$refs.content);
         chart.setOption(chartOption);
         chart.resize();
-      });
-    }
+      } else if (type === 'component') {
+        // 如果没有挂载组件，就初始化组件并挂载
+        if (!this.$elementVM.childVM) {
+          const comp = require(`@/components/${componentName}`).default;
+          const Ctor = Vue.extend(comp);
+          const vm = new Ctor({
+            propsData: compOption,
+          });
+          vm.$mount(this.$elementVM.$refs.content); // vue 实例挂载
+          this.$elementVM.childVM = vm;
+        } else {
+          // 如果已挂载了组件，就更新组件
+          for (const key in compOption) {
+            this.$elementVM.childVM.$props[key] = compOption[key];
+          }
+        }
+      }
+    });
   }
 
   // 自毁方法

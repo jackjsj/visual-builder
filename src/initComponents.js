@@ -10,6 +10,8 @@ import {
   Button,
   Alert,
   Icon,
+  Dropdown,
+  Menu,
 } from 'ant-design-vue';
 
 Vue.use(Form)
@@ -21,4 +23,6 @@ Vue.use(Form)
   .use(Button)
   .use(Alert)
   .use(Icon)
+  .use(Dropdown)
+  .use(Menu)
   .use(Switch);

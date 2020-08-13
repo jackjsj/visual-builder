@@ -6,8 +6,26 @@
       </div>
       <!-- 插入元素工具 -->
       <div>
-        <a-button
-          @click="addElement('chart')">添加图表</a-button>
+        <a-dropdown class="mr10">
+          <a-button>图表
+            <a-icon type="down" />
+          </a-button>
+          <a-menu slot="overlay">
+            <a-menu-item>
+              <a @click="addElement('chart')">柱状图</a>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
+        <a-dropdown class="mr10">
+          <a-button>内置组件
+            <a-icon type="down" />
+          </a-button>
+          <a-menu slot="overlay">
+            <a-menu-item>
+              <a @click="addElement('component','digital-flipper')">数字翻牌器</a>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
       </div>
       <!-- 构建相关 -->
       <div>
@@ -42,8 +60,10 @@
       <div class="right ova">
         <ContainerConfigPanel :options="containerConfig"
           @change="onContainerConfigChange" v-if="$store.state.activeElements.length === 0" />
-        <ChartConfigPanel v-else :options="$store.state.activeElements[0]"
+        <ChartConfigPanel v-else-if="$store.state.activeElements[0].type==='chart'" :options="$store.state.activeElements[0]"
           @change="onChartConfigChange" />
+        <DigitalFlipperConfigPanel v-else-if="$store.state.activeElements[0].type==='component'" :options="$store.state.activeElements[0]"
+          @change="onComponentConfigChange" />
       </div>
     </div>
   </div>
@@ -59,6 +79,7 @@ import ContainerConfig from 'entities/Container';
 import Element from 'entities/Element';
 import ContainerConfigPanel from './configPanels/ContainerConfigPanel';
 import ChartConfigPanel from './configPanels/ChartConfigPanel';
+import DigitalFlipperConfigPanel from './configPanels/DigitalFlipperConfigPanel';
 import LayerCtrlPanel from './configPanels/LayerCtrlPanel';
 
 export default {
@@ -67,6 +88,7 @@ export default {
     ContainerConfigPanel,
     ChartConfigPanel,
     LayerCtrlPanel,
+    DigitalFlipperConfigPanel,
     'a-slider': Slider,
   },
   data() {
@@ -120,7 +142,7 @@ export default {
       localStorage.setItem('appConfig', JSON.stringify(this.$appConfig));
     },
     // 添加一个元素
-    addElement(type) {
+    addElement(type, componentName) {
       // 取名
       const defaultName = '未命名';
       let name = defaultName;
@@ -139,6 +161,7 @@ export default {
           $editable: true, // 以$开头的参数将不进行序列化
           type,
           name,
+          componentName,
           chartOption: {
             title: {
               text: 'ECharts 入门示例',
@@ -175,6 +198,9 @@ export default {
               },
             ],
           },
+          compOption: {
+            value: 666,
+          }
         }),
       );
     },
@@ -185,6 +211,9 @@ export default {
     onChartConfigChange(options) {
       // 触发当前元素渲染
       options.render();
+    },
+    onComponentConfigChange(options){
+
     },
   },
 };

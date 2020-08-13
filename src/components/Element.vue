@@ -32,8 +32,10 @@
         <a-icon type="copy" title="复制"></a-icon>
       </div>
     </div>
-    <div class="w100p h100p rel ovh" ref="content">
-      这是一个空的元素
+    <div class="w100p h100p rel ovh">
+      <div class="w100p h100p rel ovh" ref="content">
+        这是一个空的元素
+      </div>
     </div>
   </div>
   <!-- 非编辑状态 -->

@@ -39,8 +39,6 @@ Vue.directive('resizable', {
       document.onmousemove = ev => {
         offsetX += ev.movementX; // 累计偏移量X
         offsetY += ev.movementY; // 累计偏移量Y
-        // console.log(offsetX);
-        // setSize();
         setSizeThrottle();
       };
 
